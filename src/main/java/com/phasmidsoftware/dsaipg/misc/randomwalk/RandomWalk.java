@@ -21,7 +21,7 @@ public class RandomWalk {
      */
     public double distance() {
         // TO BE IMPLEMENTED 
-         return 0.0;
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2)); // Since the starting point is always 0,0
         // END SOLUTION
     }
 
@@ -33,7 +33,9 @@ public class RandomWalk {
      */
     private void move(int dx, int dy) {
         // TO BE IMPLEMENTED  do move
-         throw new RuntimeException("Not implemented");
+        this.x = this.x + dx;
+        this.y = this.y + dy;
+       // throw new RuntimeException("Not implemented");
         // END SOLUTION
     }
 
@@ -43,8 +45,11 @@ public class RandomWalk {
      * @param m the number of steps the drunkard takes
      */
     private void randomWalk(int m) {
-        // TO BE IMPLEMENTED 
-throw new RuntimeException("implementation missing");
+        // TO BE IMPLEMENTED
+        for(int i = 0; i < m; i++) {
+            randomMove();
+        }
+        //throw new RuntimeException("implementation missing");
     }
 
     /**
