@@ -8,8 +8,10 @@ import com.phasmidsoftware.dsaipg.util.Benchmark_Timer;
 import com.phasmidsoftware.dsaipg.util.TimeLogger;
 import com.phasmidsoftware.dsaipg.util.Utilities;
 
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import com.phasmidsoftware.dsaipg.util.Stopwatch;
 import java.util.function.UnaryOperator;
 
 /**
@@ -102,8 +104,22 @@ public class ThreeSumBenchmark {
      */
     private void benchmarkThreeSum(final String description, final Consumer<int[]> function, int n, final TimeLogger[] timeLoggers) {
         if (description.equals("ThreeSumCubic") && n > 4000) return;
-        // TO BE IMPLEMENTED 
-throw new RuntimeException("implementation missing");
+        System.out.println("*********************");
+        System.out.println(description + " benchmark for n = " + n);
+
+        for (int run = 0; run < runs; run++) {
+            int[] arr = supplier.get();
+            long timeInMillis;
+            try (Stopwatch timer = new Stopwatch()) { // To Close the stopwatch automatically
+                function.accept(arr);
+                timeInMillis = timer.lap();
+            }
+
+            for (TimeLogger timeLogger : timeLoggers) {
+                timeLogger.log("Run " + run, timeInMillis, n);
+            }
+        }
+        System.out.println("*********************");
     }
 
     /**
@@ -116,7 +132,7 @@ throw new RuntimeException("implementation missing");
      */
     private final static TimeLogger[] timeLoggersCubic = {
             new TimeLogger("Raw time per run (mSec): ", null),
-            new TimeLogger("Normalized time per run (n^3): ", n -> 1.0 / 6 * n * n * n)
+           // new TimeLogger("Normalized time per run (n^3): ", n -> 1.0 / 6 * n * n * n)
     };
     /**
      * An array of predefined TimeLogger instances used for benchmarking the performance
@@ -129,7 +145,7 @@ throw new RuntimeException("implementation missing");
      */
     private final static TimeLogger[] timeLoggersQuadrithmic = {
             new TimeLogger("Raw time per run (mSec): ", null),
-            new TimeLogger("Normalized time per run (n^2 log n): ", n -> n * n * Utilities.lg(n))
+           // new TimeLogger("Normalized time per run (n^2 log n): ", n -> n * n * Utilities.lg(n))
     };
 
     /**
@@ -143,7 +159,7 @@ throw new RuntimeException("implementation missing");
      */
     private final static TimeLogger[] timeLoggersQuadratic = {
             new TimeLogger("Raw time per run (mSec): ", null),
-            new TimeLogger("Normalized time per run (n^2): ", n -> 1.0 / 2 * n * n)
+          //  new TimeLogger("Normalized time per run (n^2): ", n -> 1.0 / 2 * n * n)
     };
 
     private final int runs;
