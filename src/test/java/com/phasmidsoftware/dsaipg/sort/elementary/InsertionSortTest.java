@@ -5,15 +5,14 @@
 package com.phasmidsoftware.dsaipg.sort.elementary;
 
 import com.phasmidsoftware.dsaipg.sort.*;
-import com.phasmidsoftware.dsaipg.util.Config;
-import com.phasmidsoftware.dsaipg.util.LazyLogger;
-import com.phasmidsoftware.dsaipg.util.PrivateMethodTester;
-import com.phasmidsoftware.dsaipg.util.StatPack;
+import com.phasmidsoftware.dsaipg.util.*;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Supplier;
 
 import static com.phasmidsoftware.dsaipg.sort.Instrument.*;
 import static com.phasmidsoftware.dsaipg.util.ConfigTest.INVERSIONS;
@@ -264,6 +263,76 @@ public class InsertionSortTest {
         assertEquals(78, instrumenter.getHits());
         assertEquals(62, instrumenter.getLookups());
     }
+
+    @Test
+    public void sortTest() {
+        int size = 250;
+        final List<String> ordersList = new ArrayList<>(4);
+        ordersList.add("random");
+        ordersList.add("ordered");
+        ordersList.add("partiallyOrdered");
+        ordersList.add("reverseOrdered");
+
+        final Config config = setupConfig("true", "true","0", "1", "", "");
+
+        while(size <= 4000) {
+            System.out.println("Benchmark for n = " + size);
+            int n = size;
+            for (String order : ordersList) {
+                Supplier<Integer[]> arraySupplier = () -> generateArray(n, order);
+                InsertionSortComparator<Integer> sorter = new InsertionSortComparator<>("InsertionSort", Comparable::compareTo ,size,10, config);
+                Benchmark_Timer<Integer[]> benchmark = new Benchmark_Timer<>("BENCHMARKSORTING", sorter::sort);
+
+                //For Warmup case, mentioned in the Assignment to get accuracy.
+                new Timer().repeat(10, true, arraySupplier, sorter::sort, null, null);
+
+                double meanTime = benchmark.runFromSupplier(arraySupplier, 10);
+                System.out.println(order.toUpperCase()+" ORDER" + "Time taken in millis:  " + meanTime);
+            }
+            size = size*2;
+            System.out.println("***********************************");
+        }
+    }
+
+    /**
+     * 
+     * @param n
+     * @param order
+     * @return
+     */
+    private static Integer[] generateArray(int n, String order) {
+        Integer[] array = new Integer[n];
+        Random random = new Random();
+
+        if(order.equals("random")) {
+           for (int i = 0; i < n; i++) {
+               array[i] = random.nextInt();
+           }
+        }
+        if(order.equals("ordered")) {
+           for (int i = 0; i < n; i++) {
+               array[i] = i+50;
+           }
+        }
+        if(order.equals("partiallyOrdered")){
+            for (int i = 0; i < n; i++) {
+                if(i < n/3)
+                {
+                    array[i] = i+50;
+                }
+                else{
+                    array[i] = random.nextInt();
+                }
+            }
+        }
+        if(order.equals("reverseOrdered")){
+            for (int i = 0; i < n; i++) {
+                array[i] = n - i;
+            }
+        }
+        return array;
+    }
+
 
     final static LazyLogger logger = new LazyLogger(InsertionSort.class);
 
