@@ -4,6 +4,8 @@
 
 package com.phasmidsoftware.dsaipg.sort.par;
 
+import scala.tools.nsc.doc.html.HtmlTags;
+
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,42 +24,53 @@ public class Main {
 
     public static void main(String[] args) {
         processArgs(args);
-        System.out.println("Degree of parallelism: " + ForkJoinPool.getCommonPoolParallelism());
-        Random random = new Random();
-        int[] array = new int[2000000];
-        ArrayList<Long> timeList = new ArrayList<>();
-        for (int j = 50; j < 100; j++) {
-            ParSort.cutoff = 10000 * (j + 1);
-            // for (int i = 0; i < array.length; i++) array[i] = random.nextInt(10000000);
-            long time;
-            long startTime = System.currentTimeMillis();
-            for (int t = 0; t < 10; t++) {
-                for (int i = 0; i < array.length; i++) array[i] = random.nextInt(10000000);
-                ParSort.sort(array, 0, array.length);
+        int size = 500000;
+        while(size <= 2000000) {
+            int thread = 2;
+            System.out.println("Size of the ARRAY " +size);
+            while (thread < 128) {
+                ForkJoinPool pool = new ForkJoinPool(thread);
+                System.out.println("Degree of parallelism: " + pool.getParallelism());
+                Random random = new Random();
+                int[] array = new int[size];
+                ArrayList<Long> timeList = new ArrayList<>();
+                ArrayList<Integer> cutoffs = new ArrayList<>();
+                ParSort.cutoff = size/4+10000;
+                for (int j = 1; j < 25; j++) {
+                    // for (int i = 0; i < array.length; i++) array[i] = random.nextInt(10000000);
+                    long time;
+                    long startTime = System.currentTimeMillis();
+                    for (int t = 0; t < 10; t++) {
+                        for (int i = 0; i < array.length; i++) array[i] = random.nextInt(10000000);
+                        ParSort.sort(array, 0, array.length, pool);
+                    }
+                    long endTime = System.currentTimeMillis();
+                    time = (endTime - startTime);
+                    timeList.add(time);
+                    cutoffs.add(ParSort.cutoff);
+                    System.out.println("cutoff：" + (ParSort.cutoff) + "\t\t10times Time:" + time + "ms");
+                    ParSort.cutoff = ParSort.cutoff + 10000 ;
+                }
+                try {
+                    String outputFile = "./src/Assignment5/result"+size+"_"+thread+".csv";
+                    FileOutputStream fis = new FileOutputStream(outputFile);
+                    OutputStreamWriter isr = new OutputStreamWriter(fis);
+                    BufferedWriter bw = new BufferedWriter(isr);
+                    int j = 0;
+                    for (long i : timeList) {
+                        String content = cutoffs.get(j) + "," + (double) i / 10 + "\n";
+                        j++;
+                        bw.write(content);
+                        bw.flush();
+                    }
+                    bw.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                thread = thread * 2;
             }
-            long endTime = System.currentTimeMillis();
-            time = (endTime - startTime);
-            timeList.add(time);
-
-
-            System.out.println("cutoff：" + (ParSort.cutoff) + "\t\t10times Time:" + time + "ms");
-
-        }
-        try {
-            FileOutputStream fis = new FileOutputStream("./src/result.csv");
-            OutputStreamWriter isr = new OutputStreamWriter(fis);
-            BufferedWriter bw = new BufferedWriter(isr);
-            int j = 0;
-            for (long i : timeList) {
-                String content = (double) 10000 * (j + 1) / 2000000 + "," + (double) i / 10 + "\n";
-                j++;
-                bw.write(content);
-                bw.flush();
-            }
-            bw.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            size = size*2;
         }
     }
 
