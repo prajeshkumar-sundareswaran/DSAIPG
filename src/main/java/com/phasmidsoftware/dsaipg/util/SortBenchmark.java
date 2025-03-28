@@ -456,6 +456,9 @@ public class SortBenchmark {
         try (Stopwatch stopwatch = new Stopwatch()) {
             new SorterBenchmark<>(Integer.class, preProcessor, sorter, numbers, nRuns, timeLoggers).run(getDescription(n, sorter), n);
             sorter.close();
+            logger.info("\n\n");
+            logger.info(sorter.getHelper().showStats());
+            sorter.close();
             logger.info("************************************************************ (" + stopwatch.lap() / 1000.0 + " sec.)");
         }
     }

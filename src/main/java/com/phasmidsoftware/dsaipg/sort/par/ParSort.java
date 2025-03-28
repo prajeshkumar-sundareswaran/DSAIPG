@@ -28,6 +28,18 @@ final class ParSort {
      */
     public static int cutoff = 1000;
 
+
+    /**
+     *
+     * @param array
+     * @param from
+     * @param to
+     */
+    public static void sort(int[] array, int from, int to) {
+        ForkJoinPool pool = new ForkJoinPool(2); // You can also specify parallelism level if needed
+        sort(array, from, to, pool);
+    }
+
     /**
      * Sorts the specified portion of the input array using a parallel sorting algorithm.
      * If the range to be sorted is smaller than a predefined cutoff value, the method
